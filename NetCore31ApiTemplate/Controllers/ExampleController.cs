@@ -26,7 +26,7 @@ namespace NetCore31ApiTemplate.Controllers
         [SwaggerResponse(HttpStatusCode.NotFound, typeof(ActionResult), Description = "Not Found")]
         public async Task<IActionResult> Test([FromRoute]int statusToReturn = 200)
         {
-            return await ExecuteAndMapToActionResult(() =>
+            return await ExecuteAndMapToActionResultAsync(() =>
             {
                 return statusToReturn switch
                 {
@@ -38,6 +38,8 @@ namespace NetCore31ApiTemplate.Controllers
                 };
             });
         }
+
+
 
         public class TestResponse
         {
