@@ -28,19 +28,14 @@ namespace NetCore31ApiTemplate.Controllers
         {
             return await ExecuteAndMapToActionResult(() =>
             {
-                switch (statusToReturn)
+                return statusToReturn switch
                 {
-                    case 200:
-                        return Task.FromResult(new TestResponse{TestProp = _responseStringFromConfig});
-                    case 500:
-                        throw new InvalidOperationException("Exception happened");
-                    case 400:
-                        throw new ValidationException("Wrong");
-                    case 404:
-                        return null;
-                    default:
-                        return null;
-                }
+                    200 => Task.FromResult(new TestResponse {TestProp = _responseStringFromConfig}),
+                    500 => throw new InvalidOperationException("Exception happened"),
+                    400 => throw new ValidationException("Wrong"),
+                    404 => null,
+                    _ => null
+                };
             });
         }
 
