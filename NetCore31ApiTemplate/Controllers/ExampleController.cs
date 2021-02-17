@@ -4,6 +4,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using NetCore31ApiTemplate.Exceptions;
+using NetCore31ApiTemplate.Objects;
 using NetCore31ApiTemplate.Objects.Responses;
 using NSwag.Annotations;
 using TestResponse = NetCore31ApiTemplate.Objects.Responses.TestResponse;

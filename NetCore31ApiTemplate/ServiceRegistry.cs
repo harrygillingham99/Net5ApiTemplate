@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NetCore31ApiTemplate.Attributes;
+using NetCore31ApiTemplate.Objects;
 using Scrutor;
 
 namespace NetCore31ApiTemplate

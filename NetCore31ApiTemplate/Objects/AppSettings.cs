@@ -1,4 +1,4 @@
-﻿namespace NetCore31ApiTemplate
+﻿namespace NetCore31ApiTemplate.Objects
 {
     public class AppSettings
     {

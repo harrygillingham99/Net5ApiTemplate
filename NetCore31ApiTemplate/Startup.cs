@@ -1,3 +1,4 @@
+using System.Drawing;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -9,13 +10,14 @@ namespace NetCore31ApiTemplate
 {
     public class Startup
     {
-        public const string CorsKey = "Policy";
+        private readonly string _corsKey;
+        private readonly IConfiguration _configuration;
+
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            _configuration = configuration;
+            _corsKey = "CorsPolicy";
         }
-
-        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -24,7 +26,7 @@ namespace NetCore31ApiTemplate
 
             services.AddCors(options =>
             {
-                options.AddPolicy(CorsKey,
+                options.AddPolicy(_corsKey,
                     builder =>
                     {
                         builder.AllowAnyOrigin()
@@ -40,6 +42,8 @@ namespace NetCore31ApiTemplate
                 configure.Description = "An API interface.";
                 configure.OperationProcessors.Add(new HeaderParameterOperationProcessor());
                 configure.DocumentProcessors.Add(new SchemaExtenderDocumentProcessor());
+
+                //TODO: uncomment this if you need to put JWTs in Authorization header (Http Helpers has a function to extract it from request)
                 //configure.AddSecurity("JWT", Enumerable.Empty<string>(), new OpenApiSecurityScheme
                 //{
                 //    Type = OpenApiSecuritySchemeType.ApiKey,
@@ -51,7 +55,7 @@ namespace NetCore31ApiTemplate
                 //configure.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
             });
 
-            ServiceRegistry.AddConfigs(services, Configuration);
+            ServiceRegistry.AddConfigs(services, _configuration);
 
             ServiceRegistry.ScanForAllRemainingRegistrations(services);
         }
@@ -82,7 +86,7 @@ namespace NetCore31ApiTemplate
 
             app.UseRouting();
 
-            app.UseCors(CorsKey);
+            app.UseCors(_corsKey);
 
             app.UseAuthorization();
 

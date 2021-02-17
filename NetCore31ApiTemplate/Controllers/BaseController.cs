@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using NetCore31ApiTemplate.Exceptions;
 using NetCore31ApiTemplate.Helpers;
+using NetCore31ApiTemplate.Objects;
 using NetCore31ApiTemplate.Objects.Responses;
 using Serilog;
 
