@@ -1,5 +1,5 @@
 # NetCore31ApiTemplate
-A .NET Core 3.1 API Template
+An opinionated NSwag/Typescript Client gen friendly .NET Core 3.1 API Template
 
 Includes;
 - Scrutor for auto interface registration
