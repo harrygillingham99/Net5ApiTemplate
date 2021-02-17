@@ -1,6 +1,7 @@
 ﻿using System.CodeDom.Compiler;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using NetCore31ApiTemplate.Attributes;
 using Scrutor;
 
 namespace NetCore31ApiTemplate
@@ -11,7 +12,7 @@ namespace NetCore31ApiTemplate
         {
             services.Scan(scan => scan
                 .FromAssembliesOf(typeof(Startup))
-                .AddClasses(x => x.WithoutAttribute(typeof(GeneratedCodeAttribute)))
+                .AddClasses(x => x.WithoutAttribute(typeof(GeneratedCodeAttribute)).WithoutAttribute(typeof(ScrutorIgnoreAttribute)))
                 .UsingRegistrationStrategy(RegistrationStrategy.Skip)
                 .AsImplementedInterfaces()
                 .WithScopedLifetime());

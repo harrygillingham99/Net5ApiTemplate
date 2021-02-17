@@ -1,22 +1,37 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using NetCore31ApiTemplate.Exceptions;
+using NetCore31ApiTemplate.Helpers;
+using NetCore31ApiTemplate.Objects.Responses;
 using Serilog;
 
 namespace NetCore31ApiTemplate.Controllers
 {
     public class BaseController : ControllerBase
     {
-        protected async Task<IActionResult> ExecuteAndMapToActionResultAsync<T>(Func<Task<T>> request)
+        private readonly bool _requestLogging;
+        private readonly Stopwatch _stopwatch;
+
+        public BaseController(
+            IOptions<AppSettings> options)
+        {
+            _stopwatch = new Stopwatch();
+            _requestLogging = options.Value.RequestLogging;
+        }
+
+        protected async Task<IActionResult> ExecuteAndMapToActionResult<T>(Func<Task<T>> request)
         {
             try
             {
+                _stopwatch.Start();
                 var response = await request.Invoke();
-
                 return response switch
                 {
-                    null => throw new NullReferenceException(),
+                    null => throw new NullReferenceException($"null response from {request.Method.Name}"),
 
                     Exception errorResponse => throw errorResponse,
 
@@ -26,24 +41,50 @@ namespace NetCore31ApiTemplate.Controllers
             catch (NullReferenceException ex)
             {
                 Log.Error(ex, ex.Message);
-                return NotFound($"{request.Method.Name} returned null");
+                return NotFound(new NotFoundResponse
+                {
+                    Message = ex.Message,
+                    Title = ex.GetType().Name,
+                    BadProperties = new Dictionary<string, string>()
+                });
             }
-            catch (ValidationException ex)
+            catch (UnauthorizedRequestException ex)
+            {
+                Log.Error(ex, ex.Message);
+                return Unauthorized(new UnauthorizedResponse
+                {
+                    Message = ex.Message,
+                    Title = ex.GetType().Name
+                });
+            }
+            catch (BadRequestException ex)
             {
                 Log.Error(ex, $"Bad Request: {ex.Message}");
-                return BadRequest(ex.Message);
+                return BadRequest(new ValidationResponse
+                {
+                    Message = ex.Message,
+                    Title = ex.GetType().Name,
+                    ValidationErrors = new Dictionary<string, string>()
+                });
             }
             catch (Exception ex)
             {
                 Log.Error(ex, ex.Message);
-                return Problem(ex.Message);
+                return Problem(ex.Message, statusCode: 500, title: ex.GetType().Name);
+            }
+            finally
+            {
+                _stopwatch.Stop();
+                RequestAudit(new RequestAudit(HttpContext.Request.GetMetadataFromRequestHeaders(),
+                    _stopwatch.ElapsedMilliseconds, HttpContext.Request.Path.Value));
             }
         }
 
-        protected async Task<T> ExecuteAsync<T>(Func<Task<T>> request)
+        protected async Task<T> ExecuteAndReturn<T>(Func<Task<T>> request)
         {
             try
             {
+                _stopwatch.Start();
                 return await request.Invoke();
             }
             catch (Exception ex)
@@ -51,51 +92,23 @@ namespace NetCore31ApiTemplate.Controllers
                 Log.Error(ex.Message, ex);
                 throw;
             }
-        }
-
-        protected T Execute<T>(Func<T> request)
-        {
-            try
+            finally
             {
-                return request.Invoke();
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex.Message, ex);
-                throw;
+                _stopwatch.Stop();
+                RequestAudit(new RequestAudit(HttpContext.Request.GetMetadataFromRequestHeaders(),
+                    _stopwatch.ElapsedMilliseconds, HttpContext.Request.Path.Value));
             }
         }
 
-        protected IActionResult ExecuteAndMapToActionResult<T>(Func<T> request)
+        private void RequestAudit(RequestAudit audit)
         {
-            try
+            if (audit.Metadata != null && _requestLogging)
             {
-                var response = request.Invoke();
-
-                return response switch
-                {
-                    null => throw new NullReferenceException(),
-
-                    Exception errorResponse => throw errorResponse,
-
-                    _ => Ok(response)
-                };
+                //TODO: wire up a DAL or set up another logger
             }
-            catch (NullReferenceException ex)
-            {
-                Log.Error(ex, ex.Message);
-                return NotFound($"{request.Method.Name} returned null");
-            }
-            catch (ValidationException ex)
-            {
-                Log.Error(ex, $"Bad Request: {ex.Message}");
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, ex.Message);
-                return Problem(ex.Message);
-            }
+            else
+                Debug.WriteLine(
+                    $"****Requested {audit.RequestedEndpoint}, It took {audit.ElapsedMilliseconds}ms to respond.****");
         }
     }
 }

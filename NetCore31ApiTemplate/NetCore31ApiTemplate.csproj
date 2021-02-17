@@ -22,6 +22,10 @@
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\NetCore31ApiTemplate.Client\NetCore31ApiTemplate.Client.csproj" />
+  </ItemGroup>
+
   <Target Name="NSwag" BeforeTargets="AfterBuild" Condition=" '$(Configuration)' == 'Debug' ">
     <Exec ConsoleToMSBuild="true" ContinueOnError="true" Command="$(NSwagExe_Core31) run nswag.json">
       <Output TaskParameter="ExitCode" PropertyName="NSwagExitCode" />
