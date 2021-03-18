@@ -1,5 +1,5 @@
-# NetCore31ApiTemplate
-An opinionated .NET Core 3.1 API Template. 
+# Net5ApiTemplate
+An opinionated .NET 5 API Template. 
 
 Includes;
 - Scrutor for auto interface registration
