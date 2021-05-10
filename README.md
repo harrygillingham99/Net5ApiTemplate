@@ -1,6 +1,8 @@
 # Net5ApiTemplate
 An opinionated .NET 5 API Template. 
 
+This is a test branch for demonstrating my Dissertation Project
+
 Includes;
 - Scrutor for auto interface registration
 - NSwag to generate CSharp and TypeScript Client Libraries using a post-MSBuild step
